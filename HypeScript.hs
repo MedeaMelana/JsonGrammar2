@@ -25,11 +25,11 @@ data Grammar (c :: Context) t1 t2 where
 
   -- Object context
   Object :: Grammar Obj t1 t2 -> Grammar Val (Value :- t1) t2
-  Property :: Text -> Grammar Val (Value :- t) (a :- t) -> Grammar Obj t (a :- t)
+  Property :: Text -> Grammar Val (Value :- t1) t2 -> Grammar Obj t1 t2
 
   -- Array context
   Array :: Grammar Arr t1 t2 -> Grammar Val (Value :- t1) t2
-  Element :: Grammar Val t (a :- t) -> Grammar Arr t (a :- t)
+  Element :: Grammar Val (Value :- t1) t2 -> Grammar Arr t1 t2
 
 instance Category (Grammar c) where
   id = Id
