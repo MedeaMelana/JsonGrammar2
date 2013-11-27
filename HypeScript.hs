@@ -9,7 +9,7 @@ import Prelude hiding (id, (.))
 import Control.Applicative ((<$>))
 import Control.Category (Category(..))
 import Data.Aeson (Value, FromJSON(..), ToJSON(..))
-import Data.Aeson.Types (parseMaybe)
+import Data.Aeson.Types (Parser, parseMaybe)
 import Data.Monoid (Monoid(..))
 import Data.Text (Text)
 
@@ -29,7 +29,7 @@ data Grammar (c :: Context) t1 t2 where
   (:.) :: Grammar c t2 t3 -> Grammar c t1 t2 -> Grammar c t1 t3
   Empty :: Grammar c t1 t2
   (:<>) :: Grammar c t1 t2 -> Grammar c t1 t2 -> Grammar c t1 t2
-  Pure :: (t1 -> Maybe t2) -> (t2 -> Maybe t1) -> Grammar c t1 t2
+  Pure :: (t1 -> Parser t2) -> (t2 -> Maybe t1) -> Grammar c t1 t2
 
   -- Value context
   Literal :: Value -> Grammar Val (Value :- t) t
@@ -70,7 +70,7 @@ instance Json Float where grammar = liftAeson
 liftAeson :: (FromJSON a, ToJSON a) => Grammar c (Value :- t) (a :- t)
 liftAeson = Pure f g
   where
-    f (val :- t) = (:- t) <$> parseMaybe parseJSON val
+    f (val :- t) = (:- t) <$> parseJSON val
     g (x :- t) = Just (toJSON x :- t)
 
 prop :: Json a => Text -> Grammar Obj t (a :- t)

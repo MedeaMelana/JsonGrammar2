@@ -28,20 +28,20 @@ cPerson :: Grammar c
   (Person :- t)
 cPerson = Pure f g
   where
-    f (a :- b :- c :- d :- e :- t) = Just (Person a b c d e :- t)
+    f (a :- b :- c :- d :- e :- t) = return (Person a b c d e :- t)
     g (Person a b c d e :- t) = Just (a :- b :- c :- d :- e :- t)
 
 cMale :: Grammar c t (Gender :- t)
 cMale = Pure f g
   where
-    f t = Just (Male :- t)
+    f t = return (Male :- t)
     g (Male :- t) = Just t
     g _ = Nothing
 
 cFemale :: Grammar c t (Gender :- t)
 cFemale = Pure f g
   where
-    f t = Just (Female :- t)
+    f t = return (Female :- t)
     g (Female :- t) = Just t
     g _ = Nothing
 
