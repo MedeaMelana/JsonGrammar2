@@ -18,7 +18,7 @@ import Data.Text (Text)
 -- Types
 
 
-data h :- t = h :- t
+data h :- t = h :- t deriving Show
 infixr 5 :-
 
 data Context = Val | Obj | Arr

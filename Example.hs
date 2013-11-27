@@ -19,9 +19,9 @@ data Person = Person
   , age    :: Int
   , lat    :: Float
   , lng    :: Float
-  }
+  } deriving Show
 
-data Gender = Male | Female
+data Gender = Male | Female deriving Show
 
 cPerson :: Grammar c
   (Text :- Gender :- Int :- Float :- Float :- t)
