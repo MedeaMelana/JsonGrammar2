@@ -6,6 +6,7 @@ module Example where
 
 import HypeScript
 import Parser
+import Unparser
 
 import Prelude hiding (id, (.))
 import Control.Category (Category(..))
