@@ -51,9 +51,9 @@ instance Json Gender where
 
 instance Json Person where
   grammar = cPerson . Object
-    ( Property "name" grammar
-    . Property "gender" grammar
-    . Property "age" grammar
-    . Property "lat" grammar
-    . Property "lng" grammar
+    ( prop "name"
+    . prop "gender"
+    . prop "age"
+    . prop "lat"
+    . prop "lng"
     )
