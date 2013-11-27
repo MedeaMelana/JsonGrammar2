@@ -10,6 +10,7 @@ import Control.Applicative ((<$>))
 import Control.Category (Category(..))
 import Data.Aeson (Value, FromJSON(..), ToJSON(..))
 import Data.Aeson.Types (parseMaybe)
+import Data.Monoid (Monoid(..))
 import Data.Text (Text)
 
 data h :- t = h :- t
@@ -21,7 +22,9 @@ data Grammar (c :: Context) t1 t2 where
   -- Any context
   Id :: Grammar c t t
   (:.) :: Grammar c t2 t3 -> Grammar c t1 t2 -> Grammar c t1 t3
-  Pure :: (t1 -> Maybe t2) -> (t2 -> t1) -> Grammar c t1 t2
+  Empty :: Grammar c t1 t2
+  (:<>) :: Grammar c t1 t2 -> Grammar c t1 t2 -> Grammar c t1 t2
+  Pure :: (t1 -> Maybe t2) -> (t2 -> Maybe t1) -> Grammar c t1 t2
 
   -- Value context
   Literal :: Value -> Grammar Val (Value :- t) t
@@ -38,6 +41,10 @@ instance Category (Grammar c) where
   id = Id
   (.) = (:.)
 
+instance Monoid (Grammar c t1 t2) where
+  mempty = Empty
+  mappend = (:<>)
+
 gText :: Grammar Val (Value :- t) (Text :- t)
 gText = liftAeson
 
@@ -51,4 +58,4 @@ liftAeson :: (FromJSON a, ToJSON a) => Grammar c (Value :- t) (a :- t)
 liftAeson = Pure f g
   where
     f (val :- t) = (:- t) <$> parseMaybe parseJSON val
-    g (x :- t) = toJSON x :- t
+    g (x :- t) = Just (toJSON x :- t)
