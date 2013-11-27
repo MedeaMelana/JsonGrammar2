@@ -13,6 +13,11 @@ import Data.Aeson.Types (parseMaybe)
 import Data.Monoid (Monoid(..))
 import Data.Text (Text)
 
+
+
+-- Types
+
+
 data h :- t = h :- t
 infixr 5 :-
 
@@ -45,17 +50,25 @@ instance Monoid (Grammar c t1 t2) where
   mempty = Empty
   mappend = (:<>)
 
-gText :: Grammar Val (Value :- t) (Text :- t)
-gText = liftAeson
 
-gInt :: Grammar Val (Value :- t) (Int :- t)
-gInt = liftAeson
 
-gFloat :: Grammar Val (Value :- t) (Float :- t)
-gFloat = liftAeson
+-- Constructing grammars
+
 
 liftAeson :: (FromJSON a, ToJSON a) => Grammar c (Value :- t) (a :- t)
 liftAeson = Pure f g
   where
     f (val :- t) = (:- t) <$> parseMaybe parseJSON val
     g (x :- t) = Just (toJSON x :- t)
+
+
+
+-- Typeclass Json
+
+
+class Json a where
+  grammar :: Grammar Val (Value :- t) (a :- t)
+
+instance Json Text  where grammar = liftAeson
+instance Json Int   where grammar = liftAeson
+instance Json Float where grammar = liftAeson

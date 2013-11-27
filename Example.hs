@@ -45,15 +45,15 @@ cFemale = Pure f g
     g (Female :- t) = Just t
     g _ = Nothing
 
-gGender :: Grammar Val (Value :- t) (Gender :- t)
-gGender =  cMale   . Literal "male"
-        <> cFemale . Literal "female"
+instance Json Gender where
+  grammar = cMale   . Literal "male"
+         <> cFemale . Literal "female"
 
-gPerson :: Grammar Val (Value :- t) (Person :- t)
-gPerson = cPerson . Object
-  ( Property "name" gText 
-  . Property "gender" gGender 
-  . Property "age" gInt
-  . Property "lat" gFloat
-  . Property "lng" gFloat
-  )
+instance Json Person where
+  grammar = cPerson . Object
+    ( Property "name" grammar
+    . Property "gender" grammar
+    . Property "age" grammar
+    . Property "lat" grammar
+    . Property "lng" grammar
+    )
