@@ -11,6 +11,7 @@ import Unparser
 import Prelude hiding (id, (.))
 import Control.Category (Category(..))
 import Data.Aeson (Value)
+import Data.Aeson.Types (parseMaybe)
 import Data.Monoid ((<>))
 import Data.Text (Text)
 
@@ -18,19 +19,29 @@ data Person = Person
   { name   :: Text
   , gender :: Gender
   , age    :: Int
-  , lat    :: Float
-  , lng    :: Float
-  } deriving Show
+  , coords :: Coords
+  } deriving (Show, Eq)
 
-data Gender = Male | Female deriving Show
+data Coords = Coords { lat :: Float, lng :: Float }
+  deriving (Show, Eq)
+
+data Gender = Male | Female deriving (Show, Eq)
 
 cPerson :: Grammar c
-  (Text :- Gender :- Int :- Float :- Float :- t)
+  (Text :- Gender :- Int :- Coords :- t)
   (Person :- t)
 cPerson = Pure f g
   where
-    f (a :- b :- c :- d :- e :- t) = return (Person a b c d e :- t)
-    g (Person a b c d e :- t) = Just (a :- b :- c :- d :- e :- t)
+    f (a :- b :- c :- d :- t) = return (Person a b c d :- t)
+    g (Person a b c d :- t) = return (a :- b :- c :- d :- t)
+
+cCoords :: Grammar c
+  (Float :- Float :- t)
+  (Coords :- t)
+cCoords = Pure f g
+  where
+    f (a :- b :- t) = return (Coords a b :- t)
+    g (Coords a b :- t) = return (a :- b :- t)
 
 cMale :: Grammar c t (Gender :- t)
 cMale = Pure f g
@@ -55,6 +66,19 @@ instance Json Person where
     ( prop "name"
     . prop "gender"
     . prop "age"
+    . cCoords
     . prop "lat"
     . prop "lng"
     )
+
+alice :: Person
+alice = Person "Alice" Female 21 (Coords 52 5)
+
+bob :: Person
+bob = Person "Bob" Male 22 (Coords 53 6)
+
+test :: Bool
+test = alice == alice'
+  where
+    Just (aliceJson :- ()) = unparseValue grammar (alice :- ())
+    Just (alice' :- ()) = parseMaybe (parseValue grammar) (aliceJson :- ())
