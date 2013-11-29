@@ -10,7 +10,6 @@ import Unparser
 
 import Prelude hiding (id, (.))
 import Control.Category (Category(..))
-import Data.Aeson (Value)
 import Data.Aeson.Types (parseMaybe)
 import Data.Monoid ((<>))
 import Data.Text (Text)
@@ -77,8 +76,11 @@ alice = Person "Alice" Female 21 (Coords 52 5)
 bob :: Person
 bob = Person "Bob" Male 22 (Coords 53 6)
 
-test :: Bool
-test = alice == alice'
+checkInverse :: (Json a, Eq a) => a -> Bool
+checkInverse value = value == value'
   where
-    Just (aliceJson :- ()) = unparseValue grammar (alice :- ())
-    Just (alice' :- ()) = parseMaybe (parseValue grammar) (aliceJson :- ())
+    Just (json :- ()) = unparseValue grammar (value :- ())
+    Just (value' :- ()) = parseMaybe (parseValue grammar) (json :- ())
+
+test :: Bool
+test = checkInverse [alice, bob] && checkInverse (alice, bob)
