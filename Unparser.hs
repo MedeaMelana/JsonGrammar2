@@ -6,6 +6,7 @@
 module Unparser where
 
 import HypeScript
+import Util
 
 import Control.Applicative ((<$>), (<|>))
 import Control.Monad ((>=>))
@@ -21,6 +22,7 @@ unparseValue = \case
   Empty -> fail "empty grammar"
   g1 :<> g2 -> \x -> unparseValue g1 x <|> unparseValue g2 x
   Pure _ f -> f
+  Many g -> manyM (unparseValue g)
 
   -- Value context
   Literal val -> return . (val :-)
@@ -38,6 +40,7 @@ unparseProperties = \case
   Empty -> fail "empty grammar"
   g1 :<> g2 -> \objx -> unparseProperties g1 objx <|> unparseProperties g2 objx
   Pure _ f -> \(obj, x) -> (obj, ) <$> f x
+  Many g -> manyM (unparseProperties g)
   Property n gProp -> \(obj, x) -> do
     val :- y <- unparseValue gProp x
     return (H.insert n val obj, y)
@@ -49,6 +52,7 @@ unparseElements = \case
   Empty -> fail "empty grammar"
   g1 :<> g2 -> \x -> unparseElements g1 x <|> unparseElements g2 x
   Pure _ f -> \(arr, x) -> (arr, ) <$> f x
+  Many g -> manyM (unparseElements g)
   Element gEl -> \(arr, x) -> do
     val :- y <- unparseValue gEl x
-    return (V.cons val arr, y)
+    return (V.snoc arr val, y)

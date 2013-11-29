@@ -6,6 +6,7 @@
 module Parser where
 
 import HypeScript
+import Util
 
 import Control.Applicative ((<$>))
 import Control.Monad ((>=>), unless)
@@ -22,53 +23,50 @@ parseValue = \case
   Empty -> \_ -> fail "empty grammar"
   g1 :<> g2 -> parseValue g1 <> parseValue g2
   Pure f _ -> f
+  Many g -> manyM (parseValue g)
 
   -- Value context
   Literal val -> \(val' :- t) ->
     if val == val'
       then return t
       else typeMismatch "literal" val'
-  Object gProps ->
-    \(obj :- x) -> withObject "object" (parseProperties gProps x) obj
+  Object gProps -> \(val :- x) ->
+    withObject "object" (\obj -> parseProperties obj gProps x) val
   Array gElements ->
-    \(arr :- x) -> do
-      (y, arr') <- withArray "array" (parseElements gElements x) arr
+    \(val :- x) -> do
+      (arr', y) <- withArray "array" (\arr -> parseElements gElements (arr, x)) val
       unless (V.null arr') $ typeMismatch "end of array" (V.head arr')
       return y
 
-parseProperties :: Grammar Obj t1 t2 -> t1 -> Object -> Parser t2
-parseProperties g x obj =
-  case g of
-    -- Any context
-    Id -> return x
-    g1 :. g2 -> do
-      y <- parseProperties g2 x obj
-      parseProperties g1 y obj
-    Empty -> fail "empty grammar"
-    g1 :<> g2 -> (parseProperties g1 <> parseProperties g2) x obj
-    Pure f _ -> f x
+parseProperties :: Object -> Grammar Obj t1 t2 -> t1 -> Parser t2
+parseProperties obj = \case
+  -- Any context
+  Id -> return
+  g1 :. g2 -> parseProperties obj g2 >=> parseProperties obj g1
+  Empty -> \_ -> fail "empty grammar"
+  g1 :<> g2 -> parseProperties obj g1 <> parseProperties obj g2
+  Pure f _ -> f
+  Many g -> manyM (parseProperties obj g)
 
-    -- Object context
-    Property n gVal -> do
-      val <- obj .: n
-      parseValue gVal (val :- x)
+  -- Object context
+  Property n gVal -> \x -> do
+    val <- obj .: n
+    parseValue gVal (val :- x)
 
-parseElements :: Grammar Arr t1 t2 -> t1 -> Array -> Parser (t2, Array)
-parseElements g x arr =
-  case g of
-    -- Any context
-    Id -> return (x, arr)
-    g1 :. g2 -> do
-      (y, arr') <- parseElements g2 x arr
-      parseElements g1 y arr'
-    Empty -> fail "empty grammar"
-    g1 :<> g2 -> (parseElements g1 <> parseElements g2) x arr
-    Pure f _ -> (, arr) <$> f x
+parseElements :: Grammar Arr t1 t2 -> (Array, t1) -> Parser (Array, t2)
+parseElements = \case
+  -- Any context
+  Id -> return
+  g1 :. g2 -> parseElements g2 >=> parseElements g1
+  Empty -> \_ -> fail "empty grammar"
+  g1 :<> g2 -> parseElements g1 <> parseElements g2
+  Pure f _ -> \(arr, x) -> (arr, ) <$> f x
+  Many g -> manyM (parseElements g)
 
-    -- Array context
-    Element gEl ->
-      if V.null arr
-        then fail "expected at least one more array element"
-        else do
-          y <- parseValue gEl (V.last arr :- x)
-          return (y, V.init arr)
+  -- Array context
+  Element gEl -> \(arr, x) ->
+    if V.null arr
+      then fail "expected at least one more array element"
+      else do
+        y <- parseValue gEl (V.last arr :- x)
+        return (V.init arr, y)

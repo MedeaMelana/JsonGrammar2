@@ -9,7 +9,7 @@ import Prelude hiding (id, (.))
 import Control.Applicative ((<$>))
 import Control.Category (Category(..))
 import Data.Aeson (Value, FromJSON(..), ToJSON(..))
-import Data.Aeson.Types (Parser, parseMaybe)
+import Data.Aeson.Types (Parser)
 import Data.Monoid (Monoid(..))
 import Data.Text (Text)
 
@@ -30,6 +30,7 @@ data Grammar (c :: Context) t1 t2 where
   Empty :: Grammar c t1 t2
   (:<>) :: Grammar c t1 t2 -> Grammar c t1 t2 -> Grammar c t1 t2
   Pure :: (t1 -> Parser t2) -> (t2 -> Maybe t1) -> Grammar c t1 t2
+  Many :: Grammar c t t -> Grammar c t t
 
   -- Value context
   Literal :: Value -> Grammar Val (Value :- t) t
@@ -52,6 +53,28 @@ instance Monoid (Grammar c t1 t2) where
 
 
 
+nil :: Grammar c t ([a] :- t)
+nil = Pure f g
+  where
+    f t = return ([] :- t)
+    g ([] :- t) = return t
+    g _ = fail "expected []"
+
+cons :: Grammar c (a :- [a] :- t) ([a] :- t)
+cons = Pure f g
+  where
+    f (x :- xs :- t) = return ((x : xs) :- t)
+    g ((x : xs) :- t) = return (x :- xs :- t)
+    g _ = fail "expected (:)"
+
+tup2 :: Grammar c (a :- b :- t) ((a, b) :- t)
+tup2 = Pure f g
+  where
+    f (x :- y :- t) = return ((x, y) :- t)
+    g ((x, y) :- t) = return (x :- y :- t)
+
+
+
 -- Typeclass Json
 
 
@@ -61,6 +84,12 @@ class Json a where
 instance Json Text  where grammar = liftAeson
 instance Json Int   where grammar = liftAeson
 instance Json Float where grammar = liftAeson
+
+instance Json a => Json [a] where
+  grammar = Array (Many (Element (cons . grammar)) . nil)
+
+instance (Json a, Json b) => Json (a, b) where
+  grammar = tup2 . Array (Element grammar . Element grammar)
 
 
 
@@ -75,3 +104,6 @@ liftAeson = Pure f g
 
 prop :: Json a => Text -> Grammar Obj t (a :- t)
 prop n = Property n grammar
+
+el :: Json a => Grammar Arr t (a :- t)
+el = Element grammar
