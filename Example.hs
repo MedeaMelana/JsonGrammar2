@@ -4,7 +4,7 @@
 
 module Example where
 
-import HypeScript
+import Grammar
 import Parser
 import Unparser
 

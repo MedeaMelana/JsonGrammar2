@@ -5,7 +5,7 @@
 
 module Parser where
 
-import HypeScript
+import Grammar
 import Util
 
 import Control.Applicative ((<$>))

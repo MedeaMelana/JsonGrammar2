@@ -3,7 +3,7 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE GADTs #-}
 
-module HypeScript where
+module Grammar where
 
 import Prelude hiding (id, (.))
 import Control.Applicative ((<$>))
