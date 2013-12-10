@@ -2,6 +2,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Grammar where
 
@@ -34,6 +35,8 @@ data Grammar (c :: Context) t1 t2 where
   Many     :: Grammar c t t -> Grammar c t t
 
   Literal  :: Value -> Grammar Val (Value :- t) t
+
+  Label    :: Text -> Grammar Val t1 t2 -> Grammar Val t1 t2
 
   Object   :: Grammar Obj t1 t2 -> Grammar Val (Value :- t1) t2
   Property :: Text -> Grammar Val (Value :- t1) t2 -> Grammar Obj t1 t2
@@ -79,9 +82,9 @@ tup2 = Pure f g
 class Json a where
   grammar :: Grammar Val (Value :- t) (a :- t)
 
-instance Json Text  where grammar = liftAeson
-instance Json Int   where grammar = liftAeson
-instance Json Float where grammar = liftAeson
+instance Json Text  where grammar = Label "string" liftAeson
+instance Json Int   where grammar = Label "number" liftAeson
+instance Json Float where grammar = Label "number" liftAeson
 
 instance Json a => Json [a] where
   grammar = Array (Many (Element (cons . grammar)) . nil)

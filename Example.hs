@@ -7,12 +7,15 @@ module Example where
 import Grammar
 import Parser
 import Unparser
+import TypeScript
 
 import Prelude hiding (id, (.))
 import Control.Category (Category(..))
-import Data.Aeson.Types (parseMaybe)
-import Data.Monoid ((<>))
+import Data.Aeson.Types (Value, parseMaybe)
+import qualified Data.HashMap.Strict as H
+import Data.Monoid ((<>), First(..))
 import Data.Text (Text)
+import Language.TypeScript (Type, renderDeclarationSourceFile)
 
 data Person = Person
   { name   :: Text
@@ -61,7 +64,8 @@ instance Json Gender where
          <> cFemale . Literal "female"
 
 instance Json Person where
-  grammar = cPerson . Object
+  grammar = Label "Person" $
+    cPerson . Object
     ( prop "name"
     . prop "gender"
     . prop "age"
@@ -69,6 +73,9 @@ instance Json Person where
     . prop "lat"
     . prop "lng"
     )
+
+personGrammar :: Grammar Val (Value :- t) (Person :- t)
+personGrammar = grammar
 
 alice :: Person
 alice = Person "Alice" Female 21 (Coords 52 5)
@@ -84,3 +91,6 @@ checkInverse value = value == value'
 
 test :: Bool
 test = checkInverse [alice, bob] && checkInverse (alice, bob)
+
+test2 :: IO ()
+test2 = putStrLn (renderDeclarationSourceFile (interfaces [SomeGrammar personGrammar]))
