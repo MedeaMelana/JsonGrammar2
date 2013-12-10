@@ -12,10 +12,9 @@ import TypeScript
 import Prelude hiding (id, (.))
 import Control.Category (Category(..))
 import Data.Aeson.Types (Value, parseMaybe)
-import qualified Data.HashMap.Strict as H
-import Data.Monoid ((<>), First(..))
+import Data.Monoid ((<>))
 import Data.Text (Text)
-import Language.TypeScript (Type, renderDeclarationSourceFile)
+import Language.TypeScript (renderDeclarationSourceFile)
 
 data Person = Person
   { name   :: Text

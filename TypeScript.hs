@@ -7,60 +7,92 @@ module TypeScript where
 
 import Grammar
 
+import Control.Applicative ((<$>), (<*>))
 import Control.Monad (unless)
 import Control.Monad.State (State, execState, gets, modify)
 import Data.Aeson (Value)
 import qualified Data.Aeson as Ae
 import qualified Data.HashMap.Strict as H
 import Data.HashMap.Strict (HashMap)
-import Data.Monoid (Monoid(..), First(..), (<>))
 import Data.Text (Text)
 import qualified Data.Text as T
 import Language.TypeScript
 
 
-toType :: GrammarMap -> Grammar Val t1 t2 -> First Type
+toType :: GrammarMap -> Grammar Val t1 t2 -> Maybe Type
 toType gm = go
   where
-    ok = First . Just
-
-    go :: Grammar Val t1 t2 -> First Type
+    go :: Grammar Val t1 t2 -> Maybe Type
     go = \case
-      Id -> mempty  -- TODO
-      g1 :. g2 -> go g1 <> go g2
+      Id -> Nothing
+      g1 :. g2 ->
+        -- Produce the leftmost grammar
+        case go g1 of
+          Just ty -> Just ty
+          Nothing -> go g2
 
-      Empty -> mempty
-      g1 :<> g2 -> go g1 <> go g2
+      Empty -> Nothing
+      g1 :<> g2 -> unify <$> go g1 <*> go g2
 
-      Pure _ _ -> mempty
+      Pure _ _ -> Nothing
       Many g -> go g
 
-      Literal v -> ok (valueType v)
+      Literal v -> Just (valueType v)
 
-      Label n _ -> ok (TypeReference (TypeRef (TypeName Nothing (T.unpack n)) Nothing))
+      Label n _ -> Just (TypeReference (TypeRef (TypeName Nothing (T.unpack n)) Nothing))
 
       Object g ->
-        let toSig (n, ty) = (emptyComment,
-              PropertySignature (T.unpack n) Nothing (Just ty))
-        in ok (ObjectType (TypeBody (map toSig (H.toList (toProperties gm g)))))
+        let toSig (n, (opt, ty)) = (emptyComment,
+              PropertySignature (T.unpack n) opt (Just ty))
+        in Just (ObjectType (TypeBody (map toSig (H.toList (toProperties gm g)))))
 
       --Array g -> 
 
 emptyComment :: CommentPlaceholder
 emptyComment = Left (0, 0)
 
-toProperties :: GrammarMap -> Grammar Obj t1 t2 -> HashMap Text Type
-toProperties gm = \case
-  Id -> H.empty
-  g1 :. g2 -> H.union (toProperties gm g1) (toProperties gm g2)
+toProperties :: GrammarMap -> Grammar Obj t1 t2 -> HashMap Text (Maybe Optional, Type)
+toProperties gm = go
+  where
+    go :: Grammar Obj t1 t2 -> HashMap Text (Maybe Optional, Type)
+    go = \case
+      Id -> H.empty
+      g1 :. g2 ->
+        H.unionWith (combineTuples bothOptional unify) (go g1) (go g2)
 
-  Empty -> H.empty  -- TODO
-  g1 :<> g2 -> H.union (toProperties gm g1) (toProperties gm g2)  -- TODO
+      Empty -> H.empty
+      g1 :<> g2 ->
+        H.unionWith (combineTuples eitherOptional unify) (go g1) (go g2)
 
-  Pure _ _ -> H.empty
-  Many g -> toProperties gm g
+      Pure _ _ -> H.empty
+      Many g -> go g
 
-  Property n g -> maybe H.empty (H.singleton n) (getFirst (toType gm g))  -- TODO
+      Property n g -> maybe H.empty (\ty -> H.singleton n (Nothing, ty)) (toType gm g)
+
+combineTuples :: (a1 -> a2 -> a3) -> (b1 -> b2 -> b3) ->
+                    (a1, b1) -> (a2, b2) -> (a3, b3)
+combineTuples f g (x1, y1) (x2, y2) = (f x1 x2, g y1 y2)
+
+bothOptional :: Maybe Optional -> Maybe Optional -> Maybe Optional
+bothOptional (Just Optional) (Just Optional) = Just Optional
+bothOptional _ _ = Nothing
+
+eitherOptional :: Maybe Optional -> Maybe Optional -> Maybe Optional
+eitherOptional Nothing Nothing = Nothing
+eitherOptional _ _ = Just Optional
+
+unify :: Type -> Type -> Type
+unify ty1 ty2 | areTypesEqual ty1 ty2 = ty1
+unify _ _ = Predefined AnyType
+
+areTypesEqual :: Type -> Type -> Bool
+areTypesEqual (Predefined AnyType) (Predefined AnyType) = True
+areTypesEqual (Predefined NumberType) (Predefined NumberType) = True
+areTypesEqual (Predefined BooleanType) (Predefined BooleanType) = True
+areTypesEqual (Predefined StringType) (Predefined StringType) = True
+areTypesEqual (Predefined VoidType) (Predefined VoidType) = True
+-- TODO
+areTypesEqual _ _ = False
 
 valueType :: Value -> Type
 valueType = \case
@@ -113,4 +145,4 @@ interfaces gs = tys
           | (n, makeType -> Just (ObjectType body)) <- H.toList gm
           , let interface = Interface emptyComment (T.unpack n) Nothing Nothing body
           ]
-    makeType (SomeGrammar g) = getFirst (toType gm g)
+    makeType (SomeGrammar g) = toType gm g
