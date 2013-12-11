@@ -108,3 +108,10 @@ prop n = Property n grammar
 
 el :: Json a => Grammar Arr t (a :- t)
 el = Element grammar
+
+defaultValue :: Eq a => a -> Grammar c t (a :- t)
+defaultValue x = Pure f g
+  where
+    f t = return (x :- t)
+    g (x' :- t) | x == x' = Just t
+    g _ = Nothing

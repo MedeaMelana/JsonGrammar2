@@ -62,7 +62,14 @@ toProperties gm = go
 
       Empty -> H.empty
       g1 :<> g2 ->
-        H.unionWith (combineTuples eitherOptional unify) (go g1) (go g2)
+        let props1 = go g1
+            props2 = go g2
+            markAllOptional = fmap (\(_, ty) -> (Just Optional, ty))
+         in markAllOptional (H.difference props1 props2)
+              `H.union`
+            H.intersectionWith (combineTuples eitherOptional unify) (go g1) (go g2)
+              `H.union`
+            markAllOptional (H.difference props2 props1)
 
       Pure _ _ -> H.empty
       Many g -> go g

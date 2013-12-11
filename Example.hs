@@ -67,7 +67,7 @@ instance Json Person where
     cPerson . Object
     ( prop "name"
     . prop "gender"
-    . prop "age"
+    . (prop "age" <> defaultValue 42)
     . cCoords
     . prop "lat"
     . prop "lng"
