@@ -28,6 +28,8 @@ unparseValue = \case
 
   Literal val -> return . (val :-)
 
+  Label _ g   -> unparseValue g
+
   Object g    -> \x -> do
     (obj, y) <- unparseProperties g (H.empty, x)
     return (Ae.Object obj :- y)

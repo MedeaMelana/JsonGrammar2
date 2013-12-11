@@ -30,6 +30,8 @@ parseValue = \case
       then return t
       else typeMismatch "literal" val'
 
+  Label _ g -> parseValue g
+
   Object g -> \(val :- x) ->
     withObject "object" (\obj -> parseProperties obj g x) val
 
