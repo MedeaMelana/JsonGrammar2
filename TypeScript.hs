@@ -60,14 +60,14 @@ toProperties gm = go
       g1 :. g2 ->
         H.unionWith (combineTuples bothOptional unify) (go g1) (go g2)
 
-      Empty -> H.empty
+      Empty -> H.empty  -- TODO This is not the proper unit element
       g1 :<> g2 ->
         let props1 = go g1
             props2 = go g2
             markAllOptional = fmap (\(_, ty) -> (Just Optional, ty))
          in markAllOptional (H.difference props1 props2)
               `H.union`
-            H.intersectionWith (combineTuples eitherOptional unify) (go g1) (go g2)
+            H.intersectionWith (combineTuples eitherOptional unify) props1 props2
               `H.union`
             markAllOptional (H.difference props2 props1)
 
