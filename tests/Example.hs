@@ -29,7 +29,7 @@ data Gender = Male | Female deriving (Show, Eq)
 cPerson :: Grammar c
   (Text :- Gender :- Int :- Coords :- t)
   (Person :- t)
-cPerson = Pure f g
+cPerson = pure f g
   where
     f (a :- b :- c :- d :- t) = return (Person a b c d :- t)
     g (Person a b c d :- t) = return (a :- b :- c :- d :- t)
@@ -37,39 +37,39 @@ cPerson = Pure f g
 cCoords :: Grammar c
   (Float :- Float :- t)
   (Coords :- t)
-cCoords = Pure f g
+cCoords = pure f g
   where
     f (a :- b :- t) = return (Coords a b :- t)
     g (Coords a b :- t) = return (a :- b :- t)
 
 cMale :: Grammar c t (Gender :- t)
-cMale = Pure f g
+cMale = pure f g
   where
     f t = return (Male :- t)
     g (Male :- t) = Just t
     g _ = Nothing
 
 cFemale :: Grammar c t (Gender :- t)
-cFemale = Pure f g
+cFemale = pure f g
   where
     f t = return (Female :- t)
     g (Female :- t) = Just t
     g _ = Nothing
 
 instance Json Gender where
-  grammar = cMale   . Literal "male"
-         <> cFemale . Literal "female"
+  grammar = cMale   . literal "male"
+         <> cFemale . literal "female"
 
 instance Json Person where
-  grammar = Label "Person" $
-    cPerson . Object
+  grammar = label "Person" $
+    cPerson . object
     ( prop "name"
     . prop "gender"
     . (prop "age" <> defaultValue 42)
     . cCoords
     -- . prop "lat"
     -- . prop "lng"
-    . Property "coords" (Array (el . el))
+    . property "coords" (array (el . el))
     )
 
 personGrammar :: Grammar Val (Value :- t) (Person :- t)
@@ -98,11 +98,11 @@ printInterfaces gs = putStrLn (renderDeclarationSourceFile (interfaces gs))
 
 consList :: (forall t'. Grammar Val (Value :- t') (a :- t')) ->
             Grammar Val (Value :- t) ([a] :- t)
-consList g = Label "Node" (nilCase <> consCase)
+consList g = label "Node" (nilCase <> consCase)
   where
-    nilCase = nil . Literal Null
+    nilCase = nil . literal Null
     consCase =
-      cons . Object
-        ( Property "head" g
-        . Property "tail" (consList g)
+      cons . object
+        ( property "head" g
+        . property "tail" (consList g)
         )

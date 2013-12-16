@@ -5,16 +5,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Language.JsonGrammar.Grammar (
-    -- * Types
     Grammar(..), Context(..), (:-)(..),
-
-    -- * Constructing grammars
+    pure, many, literal, label, object, property, array, element, coerce,
     defaultValue,
-
-    -- * Wrapping constructors
     nil, cons, tup2,
-
-    -- * Type-directed grammars
     Json(..), el, prop
   ) where
 
@@ -69,6 +63,41 @@ instance Monoid (Grammar c t1 t2) where
 
 
 
+-- Elemental building blocks
+
+
+pure :: (t1 -> Parser t2) -> (t2 -> Maybe t1) -> Grammar c t1 t2
+pure = Pure
+
+many :: Grammar c t t -> Grammar c t t
+many =  Many
+
+literal :: Value -> Grammar Val (Value :- t) t
+literal = Literal
+
+label :: Text -> Grammar Val t1 t2 -> Grammar Val t1 t2
+label = Label
+
+object :: Grammar Obj t1 t2 -> Grammar Val (Value :- t1) t2
+object = Object
+
+property :: Text -> Grammar Val (Value :- t1) t2 -> Grammar Obj t1 t2
+property = Property
+
+array :: Grammar Arr t1 t2 -> Grammar Val (Value :- t1) t2
+array = Array
+
+element :: Grammar Val (Value :- t1) t2 -> Grammar Arr t1 t2
+element = Element
+
+coerce :: Type -> Grammar Val t1 t2 -> Grammar Val t1 t2
+coerce = Coerce
+
+
+
+-- Wrapping constructors
+
+
 nil :: Grammar c t ([a] :- t)
 nil = Pure f g
   where
@@ -91,7 +120,7 @@ tup2 = Pure f g
 
 
 
--- Typeclass Json
+-- Type-directed grammars
 
 
 class Json a where
