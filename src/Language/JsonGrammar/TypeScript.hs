@@ -3,7 +3,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE ViewPatterns #-}
 
-module Language.JsonGrammar.TypeScript where
+module Language.JsonGrammar.TypeScript (SomeGrammar(..), interfaces) where
 
 import Language.JsonGrammar.Grammar
 

@@ -3,7 +3,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE TupleSections #-}
 
-module Language.JsonGrammar.Parser where
+module Language.JsonGrammar.Parser (parseValue) where
 
 import Language.JsonGrammar.Grammar
 import Language.JsonGrammar.Util

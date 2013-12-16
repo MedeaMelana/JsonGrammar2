@@ -4,7 +4,19 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Language.JsonGrammar.Grammar where
+module Language.JsonGrammar.Grammar (
+    -- * Types
+    Grammar(..), Context(..), (:-)(..),
+
+    -- * Constructing grammars
+    defaultValue,
+
+    -- * Wrapping constructors
+    nil, cons, tup2,
+
+    -- * Type-directed grammars
+    Json(..), el, prop
+  ) where
 
 import Prelude hiding (id, (.))
 import Control.Applicative ((<$>))
