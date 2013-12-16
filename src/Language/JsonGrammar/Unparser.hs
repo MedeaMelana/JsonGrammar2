@@ -3,10 +3,10 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE TupleSections #-}
 
-module Unparser where
+module Language.JsonGrammar.Unparser where
 
-import Grammar
-import Util
+import Language.JsonGrammar.Grammar
+import Language.JsonGrammar.Util
 
 import Control.Applicative ((<$>), (<|>))
 import Control.Monad ((>=>))

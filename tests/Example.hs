@@ -5,10 +5,7 @@
 
 module Example where
 
-import Grammar
-import Parser
-import Unparser
-import TypeScript
+import Language.JsonGrammar
 
 import Prelude hiding (id, (.))
 import Control.Category (Category(..))

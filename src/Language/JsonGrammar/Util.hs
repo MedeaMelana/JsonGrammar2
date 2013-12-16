@@ -1,4 +1,4 @@
-module Util where
+module Language.JsonGrammar.Util where
 
 import Control.Monad ((>=>), MonadPlus(..))
 

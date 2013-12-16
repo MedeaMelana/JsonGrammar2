@@ -4,7 +4,7 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Grammar where
+module Language.JsonGrammar.Grammar where
 
 import Prelude hiding (id, (.))
 import Control.Applicative ((<$>))

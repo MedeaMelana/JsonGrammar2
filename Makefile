@@ -1,2 +1,2 @@
 run:
-	ghci -Wall Example
+	ghci -isrc:tests -Wall Example

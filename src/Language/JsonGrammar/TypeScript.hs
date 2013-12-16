@@ -3,9 +3,9 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE ViewPatterns #-}
 
-module TypeScript where
+module Language.JsonGrammar.TypeScript where
 
-import Grammar
+import Language.JsonGrammar.Grammar
 
 import Control.Applicative ((<$>), (<*>))
 import Control.Monad (unless)
