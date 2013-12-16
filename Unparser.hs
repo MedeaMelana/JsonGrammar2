@@ -38,6 +38,8 @@ unparseValue = \case
     (arr, y) <- unparseElements g (V.empty, x)
     return (Ae.Array arr :- y)
 
+  Coerce _ g -> unparseValue g
+
 
 unparseProperties ::
   Grammar Obj t1 t2 -> (Ae.Object, t2) -> Maybe (Ae.Object, t1)

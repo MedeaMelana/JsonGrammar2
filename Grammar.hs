@@ -13,6 +13,7 @@ import Data.Aeson (Value, FromJSON(..), ToJSON(..))
 import Data.Aeson.Types (Parser)
 import Data.Monoid (Monoid(..))
 import Data.Text (Text)
+import Language.TypeScript (Type(..), PredefinedType(..))
 
 
 
@@ -43,6 +44,8 @@ data Grammar (c :: Context) t1 t2 where
 
   Array    :: Grammar Arr t1 t2 -> Grammar Val (Value :- t1) t2
   Element  :: Grammar Val (Value :- t1) t2 -> Grammar Arr t1 t2
+
+  Coerce   :: Type -> Grammar Val t1 t2 -> Grammar Val t1 t2
 
 instance Category (Grammar c) where
   id = Id
@@ -82,9 +85,9 @@ tup2 = Pure f g
 class Json a where
   grammar :: Grammar Val (Value :- t) (a :- t)
 
-instance Json Text  where grammar = Label "string" liftAeson
-instance Json Int   where grammar = Label "number" liftAeson
-instance Json Float where grammar = Label "number" liftAeson
+instance Json Text  where grammar = Coerce (Predefined StringType) liftAeson
+instance Json Int   where grammar = Coerce (Predefined NumberType) liftAeson
+instance Json Float where grammar = Coerce (Predefined NumberType) liftAeson
 
 instance Json a => Json [a] where
   grammar = Array (Many (Element (cons . grammar)) . nil)

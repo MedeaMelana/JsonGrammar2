@@ -46,7 +46,9 @@ toType gm = go
               PropertySignature (T.unpack n) opt (Just ty))
         in Just (ObjectType (TypeBody (map toSig (H.toList (toProperties gm g)))))
 
-      --Array g -> 
+      Array g -> ArrayType <$> toElementType gm g
+
+      Coerce ty _ -> Just ty
 
 emptyComment :: CommentPlaceholder
 emptyComment = Left (0, 0)
@@ -75,6 +77,23 @@ toProperties gm = go
       Many g -> go g
 
       Property n g -> maybe H.empty (\ty -> H.singleton n (Nothing, ty)) (toType gm g)
+
+toElementType :: GrammarMap -> Grammar Arr t1 t2 -> Maybe Type
+toElementType gm = go
+  where
+    go :: Grammar Arr t1 t2 -> Maybe Type
+    go = \case
+      Id -> Nothing
+      g1 :. g2 -> unify <$> go g1 <*> go g2
+
+      Empty -> Nothing
+      g1 :<> g2 -> unify <$> go g1 <*> go g2
+
+      Pure _ _ -> Nothing
+      Many g -> go g
+
+      Element g -> toType gm g
+
 
 combineTuples :: (a1 -> a2 -> a3) -> (b1 -> b2 -> b3) ->
                     (a1, b1) -> (a2, b2) -> (a3, b3)
@@ -140,6 +159,8 @@ grammarMap gs =
 
       Array g      -> buildGrammarMap g
       Element g    -> buildGrammarMap g
+
+      Coerce _ g   -> buildGrammarMap g
 
 data SomeGrammar c where
   SomeGrammar :: Grammar c t1 t2 -> SomeGrammar c

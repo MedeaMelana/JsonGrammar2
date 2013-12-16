@@ -40,6 +40,9 @@ parseValue = \case
       unless (V.null arr') $ typeMismatch "end of array" (V.head arr')
       return y
 
+  Coerce _ g -> parseValue g
+
+
 
 parseProperties :: Object -> Grammar Obj t1 t2 -> t1 -> Parser t2
 parseProperties obj = \case

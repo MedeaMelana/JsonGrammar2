@@ -1,6 +1,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RankNTypes #-}
 
 module Example where
 
@@ -11,7 +12,7 @@ import TypeScript
 
 import Prelude hiding (id, (.))
 import Control.Category (Category(..))
-import Data.Aeson.Types (Value, parseMaybe)
+import Data.Aeson.Types (Value(Null), parseMaybe)
 import Data.Monoid ((<>))
 import Data.Text (Text)
 import Language.TypeScript (renderDeclarationSourceFile)
@@ -69,8 +70,9 @@ instance Json Person where
     . prop "gender"
     . (prop "age" <> defaultValue 42)
     . cCoords
-    . prop "lat"
-    . prop "lng"
+    -- . prop "lat"
+    -- . prop "lng"
+    . Property "coords" (Array (el . el))
     )
 
 personGrammar :: Grammar Val (Value :- t) (Person :- t)
@@ -92,4 +94,18 @@ test :: Bool
 test = checkInverse [alice, bob] && checkInverse (alice, bob)
 
 test2 :: IO ()
-test2 = putStrLn (renderDeclarationSourceFile (interfaces [SomeGrammar personGrammar]))
+test2 = printInterfaces [SomeGrammar personGrammar]
+
+printInterfaces :: [SomeGrammar Val] -> IO ()
+printInterfaces gs = putStrLn (renderDeclarationSourceFile (interfaces gs))
+
+consList :: (forall t'. Grammar Val (Value :- t') (a :- t')) ->
+            Grammar Val (Value :- t) ([a] :- t)
+consList g = Label "Node" (nilCase <> consCase)
+  where
+    nilCase = nil . Literal Null
+    consCase =
+      cons . Object
+        ( Property "head" g
+        . Property "tail" (consList g)
+        )
