@@ -18,6 +18,7 @@ import Control.Category (Category(..))
 import Data.Aeson (Value, FromJSON(..), ToJSON(..))
 import Data.Aeson.Types (Parser)
 import Data.Monoid (Monoid(..))
+import Data.Piso (Piso(..), FromPiso(..), (:-)(..))
 import Data.Text (Text)
 import Language.TypeScript (Type(..), PredefinedType(..))
 
@@ -25,9 +26,6 @@ import Language.TypeScript (Type(..), PredefinedType(..))
 
 -- Types
 
-
-data h :- t = h :- t deriving Show
-infixr 5 :-
 
 data Context = Val | Obj | Arr
 
@@ -60,6 +58,9 @@ instance Category (Grammar c) where
 instance Monoid (Grammar c t1 t2) where
   mempty = Empty
   mappend = (:<>)
+
+instance FromPiso (Grammar c) where
+  fromPiso (Piso f g) = Pure (return . f) g
 
 
 

@@ -2,6 +2,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Example where
 
@@ -11,6 +12,8 @@ import Prelude hiding (id, (.))
 import Control.Category (Category(..))
 import Data.Aeson.Types (Value(Null), parseMaybe)
 import Data.Monoid ((<>))
+import Data.Piso (Piso, fromPiso)
+import Data.Piso.TH (derivePisos)
 import Data.Text (Text)
 import Language.TypeScript (renderDeclarationSourceFile)
 
@@ -26,47 +29,31 @@ data Coords = Coords { lat :: Float, lng :: Float }
 
 data Gender = Male | Female deriving (Show, Eq)
 
-cPerson :: Grammar c
+cPerson :: Piso
   (Text :- Gender :- Int :- Coords :- t)
   (Person :- t)
-cPerson = pure f g
-  where
-    f (a :- b :- c :- d :- t) = return (Person a b c d :- t)
-    g (Person a b c d :- t) = return (a :- b :- c :- d :- t)
+cPerson = fromPiso $(derivePisos ''Person)
 
-cCoords :: Grammar c
+cCoords :: Piso
   (Float :- Float :- t)
   (Coords :- t)
-cCoords = pure f g
-  where
-    f (a :- b :- t) = return (Coords a b :- t)
-    g (Coords a b :- t) = return (a :- b :- t)
+cCoords = fromPiso $(derivePisos ''Coords)
 
-cMale :: Grammar c t (Gender :- t)
-cMale = pure f g
-  where
-    f t = return (Male :- t)
-    g (Male :- t) = Just t
-    g _ = Nothing
-
-cFemale :: Grammar c t (Gender :- t)
-cFemale = pure f g
-  where
-    f t = return (Female :- t)
-    g (Female :- t) = Just t
-    g _ = Nothing
+cMale :: Piso t (Gender :- t)
+cFemale :: Piso t (Gender :- t)
+(cMale, cFemale) = $(derivePisos ''Gender)
 
 instance Json Gender where
-  grammar = cMale   . literal "male"
-         <> cFemale . literal "female"
+  grammar = fromPiso cMale   . literal "male"
+         <> fromPiso cFemale . literal "female"
 
 instance Json Person where
   grammar = label "Person" $
-    cPerson . object
+    fromPiso cPerson . object
     ( prop "name"
     . prop "gender"
     . (prop "age" <> defaultValue 42)
-    . cCoords
+    . fromPiso cCoords
     -- . prop "lat"
     -- . prop "lng"
     . property "coords" (array (el . el))
