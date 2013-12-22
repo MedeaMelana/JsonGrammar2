@@ -18,10 +18,10 @@ import Data.Text (Text)
 import Language.TypeScript (renderDeclarationSourceFile)
 
 data Person = Person
-  { name   :: Text
-  , gender :: Gender
-  , age    :: Int
-  , coords :: Coords
+  { name     :: Text
+  , gender   :: Gender
+  , age      :: Int
+  , location :: Coords
   } deriving (Show, Eq)
 
 data Coords = Coords { lat :: Float, lng :: Float }
@@ -29,31 +29,31 @@ data Coords = Coords { lat :: Float, lng :: Float }
 
 data Gender = Male | Female deriving (Show, Eq)
 
-cPerson :: Piso
+person :: Piso
   (Text :- Gender :- Int :- Coords :- t)
   (Person :- t)
-cPerson = fromPiso $(derivePisos ''Person)
+person = fromPiso $(derivePisos ''Person)
 
-cCoords :: Piso
+coords :: Piso
   (Float :- Float :- t)
   (Coords :- t)
-cCoords = fromPiso $(derivePisos ''Coords)
+coords = fromPiso $(derivePisos ''Coords)
 
-cMale :: Piso t (Gender :- t)
-cFemale :: Piso t (Gender :- t)
-(cMale, cFemale) = $(derivePisos ''Gender)
+male :: Piso t (Gender :- t)
+female :: Piso t (Gender :- t)
+(male, female) = $(derivePisos ''Gender)
 
 instance Json Gender where
-  grammar = fromPiso cMale   . literal "male"
-         <> fromPiso cFemale . literal "female"
+  grammar = fromPiso male   . literal "male"
+         <> fromPiso female . literal "female"
 
 instance Json Person where
   grammar = label "Person" $
-    fromPiso cPerson . object
+    fromPiso person . object
     ( prop "name"
     . prop "gender"
     . (prop "age" <> defaultValue 42)
-    . fromPiso cCoords
+    . fromPiso coords
     -- . prop "lat"
     -- . prop "lng"
     . property "coords" (array (el . el))
