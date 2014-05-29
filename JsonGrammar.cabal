@@ -32,6 +32,7 @@ Library
                     semigroups >= 0.5 && < 0.9,
                     language-typescript >= 0,
                     mtl >= 2.1 && < 2.2,
+                    Piso < 0.2,
                     -- constraints copied from aeson-0.6.1.0:
                     attoparsec >= 0.8.6.1,
                     bytestring,
