@@ -4,7 +4,7 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module Example where
+import Types
 
 import Language.JsonGrammar
 
@@ -17,17 +17,9 @@ import Data.Piso.TH (derivePisos)
 import Data.Text (Text)
 import Language.TypeScript (renderDeclarationSourceFile)
 
-data Person = Person
-  { name     :: Text
-  , gender   :: Gender
-  , age      :: Int
-  , location :: Coords
-  } deriving (Show, Eq)
-
-data Coords = Coords { lat :: Float, lng :: Float }
-  deriving (Show, Eq)
-
-data Gender = Male | Female deriving (Show, Eq)
+import Test.Framework (Test, defaultMain)
+import Test.Framework.Providers.HUnit (testCase)
+import Test.HUnit (assertBool)
 
 person :: Piso
   (Text :- Gender :- Int :- Coords :- t)
@@ -74,11 +66,14 @@ checkInverse value = value == value'
     Just (json :- ()) = unparseValue grammar (value :- ())
     Just (value' :- ()) = parseMaybe (parseValue grammar) (json :- ())
 
-test :: Bool
-test = checkInverse [alice, bob] && checkInverse (alice, bob)
+test1 :: Test
+test1 = testCase "PersonList" (assertBool "" (checkInverse [alice, bob]))
 
-test2 :: IO ()
-test2 = printInterfaces [SomeGrammar personGrammar]
+test2 :: Test
+test2 = testCase "PersonTuple" (assertBool "" (checkInverse (alice, bob)))
+
+test3 :: Test
+test3 = testCase "TypeScriptInterfaces" (printInterfaces [SomeGrammar personGrammar])
 
 printInterfaces :: [SomeGrammar Val] -> IO ()
 printInterfaces gs = putStrLn (renderDeclarationSourceFile (interfaces gs))
@@ -93,3 +88,6 @@ consList g = label "Node" (nilCase <> consCase)
         ( property "head" g
         . property "tail" (consList g)
         )
+
+main :: IO ()
+main = defaultMain [test1, test2, test3]
