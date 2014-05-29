@@ -72,9 +72,6 @@ test1 = testCase "PersonList" (assertBool "" (checkInverse [alice, bob]))
 test2 :: Test
 test2 = testCase "PersonTuple" (assertBool "" (checkInverse (alice, bob)))
 
-test3 :: Test
-test3 = testCase "TypeScriptInterfaces" (printInterfaces [SomeGrammar personGrammar])
-
 printInterfaces :: [SomeGrammar Val] -> IO ()
 printInterfaces gs = putStrLn (renderDeclarationSourceFile (interfaces gs))
 
@@ -90,4 +87,6 @@ consList g = label "Node" (nilCase <> consCase)
         )
 
 main :: IO ()
-main = defaultMain [test1, test2, test3]
+main = do
+  printInterfaces [SomeGrammar personGrammar]
+  defaultMain [test1, test2]
