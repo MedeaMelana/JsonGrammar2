@@ -28,7 +28,7 @@ Library
                     Language.JsonGrammar.Unparser,
                     Language.JsonGrammar.Util
   Build-Depends:    base >= 3.0 && < 5,
-                    aeson >= 0.6 && < 0.7,
+                    aeson >= 0.6 && < 0.8,
                     semigroups >= 0.5 && < 0.9,
                     language-typescript >= 0,
                     mtl >= 2.1 && < 2.2,
