@@ -162,9 +162,11 @@ grammarMap gs =
 
       Coerce _ g   -> buildGrammarMap g
 
+-- | Wrap a @Grammar@, discarding the input/output type arguments.
 data SomeGrammar c where
   SomeGrammar :: Grammar c t1 t2 -> SomeGrammar c
 
+-- | Generate a list of TypeScript interface declarations from the specified grammars.
 interfaces :: [SomeGrammar Val] -> [DeclarationElement]
 interfaces gs = tys
   where

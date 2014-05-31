@@ -15,6 +15,7 @@ import qualified Data.HashMap.Strict as H
 import qualified Data.Vector as V
 
 
+-- | Convert a 'Grammar' to a JSON serializer.
 unparseValue :: Grammar Val t1 t2 -> t2 -> Maybe t1
 unparseValue = \case
   Id          -> return

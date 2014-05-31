@@ -16,6 +16,7 @@ import Data.Monoid ((<>))
 import qualified Data.Vector as V
 
 
+-- | Convert a 'Grammar' to a JSON 'Parser'.
 parseValue :: Grammar Val t1 t2 -> t1 -> Parser t2
 parseValue = \case
   Id        -> return
