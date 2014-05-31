@@ -3,6 +3,7 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 module Language.JsonGrammar.Grammar (
     Grammar(..), Context(..), (:-)(..),
@@ -19,6 +20,7 @@ import Data.Aeson (Value, FromJSON(..), ToJSON(..))
 import Data.Aeson.Types (Parser)
 import Data.Monoid (Monoid(..))
 import Data.Piso (Piso(..), FromPiso(..), (:-)(..))
+import Data.String (IsString(..))
 import Data.Text (Text)
 import Language.TypeScript (Type(..), PredefinedType(..))
 
@@ -61,6 +63,9 @@ instance Monoid (Grammar c t1 t2) where
 
 instance FromPiso (Grammar c) where
   fromPiso (Piso f g) = Pure (return . f) g
+
+instance IsString (Grammar Val (Value :- t) t) where
+  fromString = literal . fromString
 
 
 
