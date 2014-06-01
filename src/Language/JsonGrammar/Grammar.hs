@@ -94,7 +94,7 @@ literal = Literal
 label :: Text -> Grammar Val t1 t2 -> Grammar Val t1 t2
 label = Label
 
--- | Expect or produce a JSON object whose contents match the specified 'Obj' grammar. You can create 'Obj' grammars using 'property'. Alternatively, if you want to match an empty object, use @object 'id'@.
+-- | Expect or produce a JSON object whose properties match the specified 'Obj' grammar. You can create 'Obj' grammars using 'property'. Alternatively, if you want to match an empty object, use @object 'id'@.
 object :: Grammar Obj t1 t2 -> Grammar Val (Value :- t1) t2
 object = Object
 
