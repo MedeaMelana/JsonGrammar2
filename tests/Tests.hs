@@ -62,8 +62,8 @@ test2 = testCase "PersonTuple" $ assertBool "" (checkInverse (alice, bob))
 checkInverse :: (Json a, Eq a) => a -> Bool
 checkInverse value = value == value'
   where
-    Just json   = unparseValue grammar value
-    Just value' = parseMaybe (parseValue grammar) json
+    Just json   = serialize grammar value
+    Just value' = parseMaybe (parse grammar) json
 
 
 -- Write the TypeScript definition to stdout and run the tests

@@ -29,7 +29,7 @@ Library
   Other-Modules:    Language.JsonGrammar.Grammar,
                     Language.JsonGrammar.Parser,
                     Language.JsonGrammar.TypeScript,
-                    Language.JsonGrammar.Unparser,
+                    Language.JsonGrammar.Serializer,
                     Language.JsonGrammar.Util
   Build-Depends:    base >= 3.0 && < 5,
                     aeson >= 0.6 && < 0.8,

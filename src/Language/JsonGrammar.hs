@@ -23,7 +23,7 @@ module Language.JsonGrammar (
     Json(..), el, prop,
 
     -- * Using grammars
-    parseValue, unparseValue, interfaces, SomeGrammar(..)
+    parse, serialize, interfaces, SomeGrammar(..)
 
   ) where
 
@@ -32,8 +32,8 @@ import Control.Category ((.))
 import Data.Aeson.Types (Parser)
 
 import Language.JsonGrammar.Grammar
-import qualified Language.JsonGrammar.Parser as Orig
-import qualified Language.JsonGrammar.Unparser as Orig
+import Language.JsonGrammar.Parser
+import Language.JsonGrammar.Serializer
 import Language.JsonGrammar.TypeScript
 
 -- $example
@@ -82,11 +82,13 @@ import Language.JsonGrammar.TypeScript
 --
 -- > interface Person {age : number ;name : string ;}
 
-parseValue :: Grammar Val (a :- ()) (b :- ()) -> a -> Parser b
-parseValue = Orig.parseValue . unstack
+-- | Parse a JSON value according to the specified grammar.
+parse :: Grammar Val (a :- ()) (b :- ()) -> a -> Parser b
+parse = parseValue . unstack
 
-unparseValue :: Grammar Val (a :- ()) (b :- ()) -> b -> Maybe a
-unparseValue = Orig.unparseValue . unstack
+-- | Serialize a Haskell value to a JSON value according to the specified grammar.
+serialize :: Grammar Val (a :- ()) (b :- ()) -> b -> Maybe a
+serialize = serializeValue . unstack
 
 unstack :: Grammar c (a :- ()) (b :- ()) -> Grammar c a b
 unstack g = pure hd unhd . g . pure unhd hd
