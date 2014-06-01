@@ -34,7 +34,7 @@ Library
   Build-Depends:    base >= 3.0 && < 5,
                     aeson >= 0.6 && < 0.8,
                     semigroups >= 0.5 && < 0.16,
-                    language-typescript >= 0.0.4,
+                    language-typescript >= 0.0.4 && < 0.1,
                     mtl >= 2.1 && < 2.3,
                     stack-prism < 0.2,
                     -- constraints copied from aeson-0.6.1.0:
@@ -57,8 +57,8 @@ Test-Suite tests
                     stack-prism < 0.2,
                     base >= 3.0 && < 5,
                     aeson >= 0.6 && < 0.8,
-                    language-typescript >= 0.0.4,
+                    language-typescript >= 0.0.4 && < 0.1,
                     text >= 0.11.0.2,
-                    test-framework,
-                    test-framework-hunit,
-                    HUnit
+                    test-framework >= 0.8 && < 0.9,
+                    test-framework-hunit >= 0.3 && < 0.4,
+                    HUnit >= 1.2 && < 1.3
