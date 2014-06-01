@@ -1,3 +1,6 @@
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE TypeOperators #-}
+
 -- | JsonGrammar allows you to express a bidirectional mapping between Haskell datatypes and JSON ASTs in one go.
 module Language.JsonGrammar (
 
@@ -24,9 +27,13 @@ module Language.JsonGrammar (
 
   ) where
 
+import Prelude hiding ((.))
+import Control.Category ((.))
+import Data.Aeson.Types (Parser)
+
 import Language.JsonGrammar.Grammar
-import Language.JsonGrammar.Parser
-import Language.JsonGrammar.Unparser
+import qualified Language.JsonGrammar.Parser as Orig
+import qualified Language.JsonGrammar.Unparser as Orig
 import Language.JsonGrammar.TypeScript
 
 -- $example
@@ -74,3 +81,15 @@ import Language.JsonGrammar.TypeScript
 -- This results in this TypeScript definition:
 --
 -- > interface Person {age : number ;name : string ;}
+
+parseValue :: Grammar Val (a :- ()) (b :- ()) -> a -> Parser b
+parseValue = Orig.parseValue . unstack
+
+unparseValue :: Grammar Val (a :- ()) (b :- ()) -> b -> Maybe a
+unparseValue = Orig.unparseValue . unstack
+
+unstack :: Grammar c (a :- ()) (b :- ()) -> Grammar c a b
+unstack g = pure hd unhd . g . pure unhd hd
+  where
+    hd (x :- ()) = return x
+    unhd x       = return (x :- ())

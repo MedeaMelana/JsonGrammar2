@@ -9,12 +9,11 @@ import Types
 
 import Prelude hiding (id, (.))
 import Control.Category (Category(..))
-import Data.Aeson.Types (Value(Null), parseMaybe)
+import Data.Aeson.Types (Value, parseMaybe)
 import Data.Char (toLower)
 import Data.Monoid ((<>))
 import Data.StackPrism (StackPrism)
 import Data.StackPrism.TH (deriveStackPrismsWith)
-import Data.Text (Text)
 import Language.TypeScript (renderDeclarationSourceFile)
 import Test.Framework (Test, defaultMain)
 import Test.Framework.Providers.HUnit (testCase)
@@ -63,8 +62,8 @@ test2 = testCase "PersonTuple" $ assertBool "" (checkInverse (alice, bob))
 checkInverse :: (Json a, Eq a) => a -> Bool
 checkInverse value = value == value'
   where
-    Just (json   :- ()) = unparseValue grammar (value :- ())
-    Just (value' :- ()) = parseMaybe (parseValue grammar) (json :- ())
+    Just json   = unparseValue grammar value
+    Just value' = parseMaybe (parseValue grammar) json
 
 
 -- Write the TypeScript definition to stdout and run the tests
