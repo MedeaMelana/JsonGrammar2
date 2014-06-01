@@ -7,7 +7,7 @@ module Language.JsonGrammar (
     pure, many, literal, label, object, property, array, element, coerce,
 
     -- * Constructing grammars
-    defaultValue,
+    fromPrism, defaultValue,
 
     -- * Wrapping constructors
     nil, cons, tup2,

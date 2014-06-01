@@ -11,9 +11,10 @@ import Language.JsonGrammar
 import Prelude hiding (id, (.))
 import Control.Category (Category(..))
 import Data.Aeson.Types (Value(Null), parseMaybe)
+import Data.Char (toLower)
 import Data.Monoid ((<>))
-import Data.Piso (Piso, fromPiso)
-import Data.Piso.TH (derivePisos)
+import Data.StackPrism (StackPrism)
+import Data.StackPrism.TH (deriveStackPrismsWith)
 import Data.Text (Text)
 import Language.TypeScript (renderDeclarationSourceFile)
 
@@ -21,31 +22,21 @@ import Test.Framework (Test, defaultMain)
 import Test.Framework.Providers.HUnit (testCase)
 import Test.HUnit (assertBool)
 
-person :: Piso
-  (Text :- Gender :- Int :- Coords :- t)
-  (Person :- t)
-person = fromPiso $(derivePisos ''Person)
-
-coords :: Piso
-  (Float :- Float :- t)
-  (Coords :- t)
-coords = fromPiso $(derivePisos ''Coords)
-
-male :: Piso t (Gender :- t)
-female :: Piso t (Gender :- t)
-(male, female) = $(derivePisos ''Gender)
+deriveStackPrismsWith (map toLower) ''Person
+deriveStackPrismsWith (map toLower) ''Coords
+deriveStackPrismsWith (map toLower) ''Gender
 
 instance Json Gender where
-  grammar = fromPiso male   . literal "male"
-         <> fromPiso female . literal "female"
+  grammar = fromPrism male   . literal "male"
+         <> fromPrism female . literal "female"
 
 instance Json Person where
   grammar = label "Person" $
-    fromPiso person . object
+    fromPrism person . object
     ( prop "name"
     . prop "gender"
     . (prop "age" <> defaultValue 42)
-    . fromPiso coords
+    . fromPrism coords
     -- . prop "lat"
     -- . prop "lng"
     . property "coords" (array (el . el))

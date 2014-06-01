@@ -4,11 +4,12 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE RankNTypes #-}
 
 module Language.JsonGrammar.Grammar (
     Grammar(..), Context(..), (:-)(..),
     pure, many, literal, label, object, property, array, element, coerce,
-    defaultValue,
+    fromPrism, defaultValue,
     nil, cons, tup2,
     Json(..), el, prop
   ) where
@@ -19,7 +20,7 @@ import Control.Category (Category(..))
 import Data.Aeson (Value, FromJSON(..), ToJSON(..))
 import Data.Aeson.Types (Parser)
 import Data.Monoid (Monoid(..))
-import Data.Piso (Piso(..), FromPiso(..), (:-)(..))
+import Data.StackPrism (StackPrism, forward, backward, (:-)(..))
 import Data.String (IsString(..))
 import Data.Text (Text)
 import Language.TypeScript (Type(..), PredefinedType(..))
@@ -68,11 +69,7 @@ instance Monoid (Grammar c t1 t2) where
   mempty = Empty
   mappend = (:<>)
 
--- | 'Piso' isomorphisms are converted to a 'pure' grammar: one that says nothing about the expected JSON format but simply converts values on Haskell level.
-instance FromPiso (Grammar c) where
-  fromPiso (Piso f g) = Pure (return . f) g
-
--- | String literals convert to grammars that expect or produce a specific JSON string literal value.
+-- | String literals convert to grammars that expect or produce a specific JSON string 'literal' value.
 instance IsString (Grammar Val (Value :- t) t) where
   fromString = literal . fromString
 
@@ -200,3 +197,7 @@ defaultValue x = Pure f g
     f t = return (x :- t)
     g (x' :- t) | x == x' = Just t
     g _ = Nothing
+
+-- | Create a 'pure' grammar from a 'StackPrism'.
+fromPrism :: StackPrism a b -> Grammar c a b
+fromPrism p = Pure (return . forward p) (backward p)
