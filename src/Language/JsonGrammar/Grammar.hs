@@ -17,15 +17,15 @@ module Language.JsonGrammar.Grammar (
 import Prelude hiding (id, (.))
 import Control.Applicative ((<$>))
 import Control.Category (Category(..))
-import Data.Aeson (Value, FromJSON(..), ToJSON(..))
+import Data.Aeson (Value, FromJSON(..), ToJSON(..), withText)
 import Data.Aeson.Types (Parser)
 import Data.Monoid (Monoid(..))
 import Data.StackPrism (StackPrism, forward, backward, (:-)(..))
 import Data.String (IsString(..))
 import Data.Text (Text)
 import Language.TypeScript (Type(..), PredefinedType(..))
-
-
+import qualified Data.Aeson as Aeson
+import qualified Data.Text as Text
 
 -- Types
 
@@ -201,3 +201,18 @@ defaultValue x = Pure f g
 -- | Create a 'pure' grammar from a 'StackPrism'.
 fromPrism :: StackPrism a b -> Grammar c a b
 fromPrism p = Pure (return . forward p) (backward p)
+
+-- | Grammar for strings
+--
+-- (Defined explicitly rather than a Json instance so that we do not rely
+-- on FlexibleInstances.)
+string :: Grammar Val (Value :- t) (String :- t)
+string = coerce (Predefined StringType) $ pure fr to
+  where
+    fr :: (Value :- t) -> Parser (String :- t)
+    fr (val :- t) = flip (Aeson.withText "String") val $ \txt ->
+      return (Text.unpack txt :- t)
+
+    to :: (String :- t) -> Maybe (Value :- t)
+    to (str :- t) =
+      return (Aeson.String (Text.pack str) :- t)
