@@ -17,7 +17,7 @@ module Language.JsonGrammar.Grammar (
 import Prelude hiding (id, (.))
 import Control.Applicative ((<$>))
 import Control.Category (Category(..))
-import Data.Aeson (Value, FromJSON(..), ToJSON(..), withText)
+import Data.Aeson (Value, FromJSON(..), ToJSON(..))
 import Data.Aeson.Types (Parser)
 import Data.Monoid (Monoid(..))
 import Data.StackPrism (StackPrism, forward, backward, (:-)(..))
