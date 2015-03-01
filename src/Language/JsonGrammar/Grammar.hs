@@ -20,7 +20,7 @@ import Control.Category (Category(..))
 import Data.Aeson (Value, FromJSON(..), ToJSON(..))
 import Data.Aeson.Types (Parser)
 import Data.Monoid (Monoid(..))
-import Data.StackPrism (StackPrism, forward, backward, (:-)(..))
+import Data.StackPrism (StackPrism, stackPrism, forward, backward, (:-)(..))
 import Data.String (IsString(..))
 import Data.Text (Text)
 import Language.TypeScript (Type(..), PredefinedType(..))
@@ -202,17 +202,16 @@ defaultValue x = Pure f g
 fromPrism :: StackPrism a b -> Grammar c a b
 fromPrism p = Pure (return . forward p) (backward p)
 
+-- | Apply a prism to the top of the stack
+--
+-- TODO: It would be nicer if this was part of Data.StackPrism
+top :: StackPrism a b -> StackPrism (a :- t) (b :- t)
+top prism = stackPrism (\(a :- t) -> (forward prism a :- t))
+                       (\(b :- t) -> (:- t) `fmap` backward prism b)
+
 -- | Grammar for strings
 --
 -- (Defined explicitly rather than a Json instance so that we do not rely
--- on FlexibleInstances.)
+-- on OverlappingInstances.)
 string :: Grammar Val (Value :- t) (String :- t)
-string = coerce (Predefined StringType) $ pure fr to
-  where
-    fr :: (Value :- t) -> Parser (String :- t)
-    fr (val :- t) = flip (Aeson.withText "String") val $ \txt ->
-      return (Text.unpack txt :- t)
-
-    to :: (String :- t) -> Maybe (Value :- t)
-    to (str :- t) =
-      return (Aeson.String (Text.pack str) :- t)
+string = fromPrism (top (stackPrism Text.unpack (Just . Text.pack))) . grammar
