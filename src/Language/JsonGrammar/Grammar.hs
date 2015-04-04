@@ -104,8 +104,8 @@ object = Object
 --
 -- > grammar = object (propertiesA <> propertiesB)
 -- >   where
--- >     propertiesA = property "type" "A" . fromPiso constructorA . prop "foo"
--- >     propertiesB = property "type" "B" . fromPiso constructorB . prop "bar" . prop "baz"
+-- >     propertiesA = property "type" "A" . fromPrism constructorA . prop "foo"
+-- >     propertiesB = property "type" "B" . fromPrism constructorB . prop "bar" . prop "baz"
 property :: Text -> Grammar Val (Value :- t1) t2 -> Grammar Obj t1 t2
 property = Property
 
