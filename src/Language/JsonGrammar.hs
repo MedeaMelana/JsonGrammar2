@@ -83,11 +83,11 @@ import Language.JsonGrammar.TypeScript
 -- > interface Person {age : number ;name : string ;}
 
 -- | Parse a JSON value according to the specified grammar.
-parse :: Grammar Val (a :- ()) (b :- ()) -> a -> Parser b
+parse :: Grammar 'Val (a :- ()) (b :- ()) -> a -> Parser b
 parse = parseValue . unstack
 
 -- | Serialize a Haskell value to a JSON value according to the specified grammar.
-serialize :: Grammar Val (a :- ()) (b :- ()) -> b -> Maybe a
+serialize :: Grammar 'Val (a :- ()) (b :- ()) -> b -> Maybe a
 serialize = serializeValue . unstack
 
 unstack :: Grammar c (a :- ()) (b :- ()) -> Grammar c a b

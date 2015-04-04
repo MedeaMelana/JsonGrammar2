@@ -16,7 +16,7 @@ import qualified Data.Vector as V
 
 
 -- | Convert a 'Grammar' to a JSON serializer.
-serializeValue :: Grammar Val t1 t2 -> t2 -> Maybe t1
+serializeValue :: Grammar 'Val t1 t2 -> t2 -> Maybe t1
 serializeValue = \case
   Id          -> return
   g1 :. g2    -> serializeValue g1 >=> serializeValue g2
@@ -43,7 +43,7 @@ serializeValue = \case
 
 
 serializeProperties ::
-  Grammar Obj t1 t2 -> (Ae.Object, t2) -> Maybe (Ae.Object, t1)
+  Grammar 'Obj t1 t2 -> (Ae.Object, t2) -> Maybe (Ae.Object, t1)
 serializeProperties = \case
   Id           -> return
   g1 :. g2     -> serializeProperties g1 >=> serializeProperties g2
@@ -60,7 +60,7 @@ serializeProperties = \case
     return (H.insert n val obj, y)
 
 
-serializeElements :: Grammar Arr t1 t2 -> (Ae.Array, t2) -> Maybe (Ae.Array, t1)
+serializeElements :: Grammar 'Arr t1 t2 -> (Ae.Array, t2) -> Maybe (Ae.Array, t1)
 serializeElements = \case
   Id        -> return
   g1 :. g2  -> serializeElements g1 >=> serializeElements g2

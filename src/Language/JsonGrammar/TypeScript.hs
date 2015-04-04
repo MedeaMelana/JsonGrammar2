@@ -19,10 +19,10 @@ import qualified Data.Text as T
 import Language.TypeScript
 
 
-toType :: GrammarMap -> Grammar Val t1 t2 -> Maybe Type
+toType :: GrammarMap -> Grammar 'Val t1 t2 -> Maybe Type
 toType gm = go
   where
-    go :: Grammar Val t1 t2 -> Maybe Type
+    go :: Grammar 'Val t1 t2 -> Maybe Type
     go = \case
       Id -> Nothing
       g1 :. g2 ->
@@ -53,10 +53,10 @@ toType gm = go
 emptyComment :: CommentPlaceholder
 emptyComment = Left (0, 0)
 
-toProperties :: GrammarMap -> Grammar Obj t1 t2 -> HashMap Text (Maybe Optional, Type)
+toProperties :: GrammarMap -> Grammar 'Obj t1 t2 -> HashMap Text (Maybe Optional, Type)
 toProperties gm = go
   where
-    go :: Grammar Obj t1 t2 -> HashMap Text (Maybe Optional, Type)
+    go :: Grammar 'Obj t1 t2 -> HashMap Text (Maybe Optional, Type)
     go = \case
       Id -> H.empty
       g1 :. g2 ->
@@ -78,10 +78,10 @@ toProperties gm = go
 
       Property n g -> maybe H.empty (\ty -> H.singleton n (Nothing, ty)) (toType gm g)
 
-toElementType :: GrammarMap -> Grammar Arr t1 t2 -> Maybe Type
+toElementType :: GrammarMap -> Grammar 'Arr t1 t2 -> Maybe Type
 toElementType gm = go
   where
-    go :: Grammar Arr t1 t2 -> Maybe Type
+    go :: Grammar 'Arr t1 t2 -> Maybe Type
     go = \case
       Id -> Nothing
       g1 :. g2 -> unify <$> go g1 <*> go g2
@@ -129,9 +129,9 @@ valueType = \case
   Ae.Bool _   -> Predefined BooleanType
   Ae.Null     -> Predefined VoidType  -- TODO
 
-type GrammarMap = HashMap Text (SomeGrammar Val)
+type GrammarMap = HashMap Text (SomeGrammar 'Val)
 
-grammarMap :: [SomeGrammar Val] -> GrammarMap
+grammarMap :: [SomeGrammar 'Val] -> GrammarMap
 grammarMap gs =
     execState (mapM_ (\(SomeGrammar g) -> buildGrammarMap g) gs) H.empty
   where
@@ -167,7 +167,7 @@ data SomeGrammar c where
   SomeGrammar :: Grammar c t1 t2 -> SomeGrammar c
 
 -- | Generate a list of TypeScript interface declarations from the specified grammars.
-interfaces :: [SomeGrammar Val] -> [DeclarationElement]
+interfaces :: [SomeGrammar 'Val] -> [DeclarationElement]
 interfaces gs = tys
   where
     gm = grammarMap gs

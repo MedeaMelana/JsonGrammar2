@@ -17,7 +17,7 @@ import qualified Data.Vector as V
 
 
 -- | Convert a 'Grammar' to a JSON 'Parser'.
-parseValue :: Grammar Val t1 t2 -> t1 -> Parser t2
+parseValue :: Grammar 'Val t1 t2 -> t1 -> Parser t2
 parseValue = \case
   Id        -> return
   g1 :. g2  -> parseValue g2 >=> parseValue g1
@@ -45,7 +45,7 @@ parseValue = \case
 
 
 
-parseProperties :: Object -> Grammar Obj t1 t2 -> t1 -> Parser t2
+parseProperties :: Object -> Grammar 'Obj t1 t2 -> t1 -> Parser t2
 parseProperties obj = \case
   Id            -> return
   g1 :. g2     -> parseProperties obj g2 >=> parseProperties obj g1
@@ -61,7 +61,7 @@ parseProperties obj = \case
     parseValue g (val :- x)
 
 
-parseElements :: Grammar Arr t1 t2 -> (Array, t1) -> Parser (Array, t2)
+parseElements :: Grammar 'Arr t1 t2 -> (Array, t1) -> Parser (Array, t2)
 parseElements = \case
   Id        -> return
   g1 :. g2  -> parseElements g2 >=> parseElements g1

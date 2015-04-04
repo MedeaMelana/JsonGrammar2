@@ -73,8 +73,8 @@ main = do
   printInterfaces [SomeGrammar personGrammar]
   defaultMain [test1, test2]
 
-personGrammar :: Grammar Val (Value :- t) (Person :- t)
+personGrammar :: Grammar 'Val (Value :- t) (Person :- t)
 personGrammar = grammar
 
-printInterfaces :: [SomeGrammar Val] -> IO ()
+printInterfaces :: [SomeGrammar 'Val] -> IO ()
 printInterfaces gs = putStrLn (renderDeclarationSourceFile (interfaces gs))
