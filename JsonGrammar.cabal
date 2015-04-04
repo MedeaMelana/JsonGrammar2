@@ -1,5 +1,5 @@
 Name:           JsonGrammar
-Version:        1.0
+Version:        1.0.1
 Synopsis:       Combinators for bidirectional JSON parsing
 Description:   	Combinators for bidirectional JSON parsing
 
