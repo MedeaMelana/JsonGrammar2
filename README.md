@@ -1,3 +1,5 @@
+[![Build Status](https://secure.travis-ci.org/MedeaMelana/JsonGrammar2.png?branch=master)](https://travis-ci.org/MedeaMelana/JsonGrammar2)
+
 # Introducing JsonGrammar
 
 JsonGrammar is a Haskell library for converting between Haskell datatypes and
