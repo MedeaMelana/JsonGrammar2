@@ -27,7 +27,7 @@ module Language.JsonGrammar (
 
   ) where
 
-import Prelude hiding ((.))
+import Prelude (Monad(..), Maybe(..))
 import Control.Category ((.))
 import Data.Aeson.Types (Parser)
 

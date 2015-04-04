@@ -14,7 +14,7 @@ module Language.JsonGrammar.Grammar (
     Json(..), el, prop
   ) where
 
-import Prelude hiding (id, (.))
+import Prelude (Maybe(..), Monad(..), Int, Float, Eq(..))
 import Control.Applicative ((<$>))
 import Control.Category (Category(..))
 import Data.Aeson (Value, FromJSON(..), ToJSON(..))
