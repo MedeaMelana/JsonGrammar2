@@ -1,5 +1,5 @@
 Name:           JsonGrammar
-Version:        1.0.1
+Version:        1.0.2
 Synopsis:       Combinators for bidirectional JSON parsing
 Description:   	Combinators for bidirectional JSON parsing
 
@@ -32,7 +32,7 @@ Library
                     Language.JsonGrammar.Serializer,
                     Language.JsonGrammar.Util
   Build-Depends:    base >= 3.0 && < 5,
-                    aeson >= 0.6 && < 0.9,
+                    aeson >= 0.9 && < 0.10,
                     semigroups >= 0.5 && < 0.17,
                     language-typescript >= 0.0.4 && < 0.1,
                     mtl >= 2.1 && < 2.3,
@@ -56,7 +56,7 @@ Test-Suite tests
   Build-Depends:    JsonGrammar,
                     stack-prism >= 0.1 && < 0.2,
                     base >= 3.0 && < 5,
-                    aeson >= 0.6 && < 0.9,
+                    aeson >= 0.6 && < 0.10,
                     language-typescript >= 0.0.4 && < 0.1,
                     text >= 0.11.0.2,
                     test-framework >= 0.8 && < 0.9,
