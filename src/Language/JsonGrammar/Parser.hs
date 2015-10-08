@@ -47,7 +47,7 @@ parseValue = \case
 
 parseProperties :: Object -> Grammar 'Obj t1 t2 -> t1 -> Parser t2
 parseProperties obj = \case
-  Id            -> return
+  Id           -> return
   g1 :. g2     -> parseProperties obj g2 >=> parseProperties obj g1
 
   Empty        -> \_ -> fail "empty grammar"
