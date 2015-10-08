@@ -1,5 +1,5 @@
 Name:           JsonGrammar
-Version:        1.0.2
+Version:        1.0.3
 Synopsis:       Combinators for bidirectional JSON parsing
 Description:   	Combinators for bidirectional JSON parsing
 
@@ -7,7 +7,7 @@ Description:   	Combinators for bidirectional JSON parsing
 Author:         Martijn van Steenbergen
 Maintainer:     martijn@van.steenbergen.nl
 Stability:      Experimental
-Copyright:      Some Rights Reserved (CC) 2010-2014 Martijn van Steenbergen
+Copyright:      Some Rights Reserved (CC) 2010-2015 Martijn van Steenbergen
 Homepage:       https://github.com/MedeaMelana/JsonGrammar2
 Bug-reports:    https://github.com/MedeaMelana/JsonGrammar2/issues
 
@@ -32,7 +32,7 @@ Library
                     Language.JsonGrammar.Serializer,
                     Language.JsonGrammar.Util
   Build-Depends:    base >= 3.0 && < 5,
-                    aeson >= 0.9 && < 0.10,
+                    aeson >= 0.9 && < 0.11,
                     semigroups >= 0.5 && < 0.17,
                     language-typescript >= 0.0.4 && < 0.1,
                     mtl >= 2.1 && < 2.3,
@@ -56,9 +56,9 @@ Test-Suite tests
   Build-Depends:    JsonGrammar,
                     stack-prism >= 0.1 && < 0.2,
                     base >= 3.0 && < 5,
-                    aeson >= 0.6 && < 0.10,
+                    aeson >= 0.6 && < 0.11,
                     language-typescript >= 0.0.4 && < 0.1,
                     text >= 0.11.0.2,
                     test-framework >= 0.8 && < 0.9,
                     test-framework-hunit >= 0.3 && < 0.4,
-                    HUnit >= 1.2 && < 1.3
+                    HUnit >= 1.2 && < 1.4
