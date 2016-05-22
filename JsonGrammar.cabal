@@ -7,15 +7,16 @@ Description:   	Combinators for bidirectional JSON parsing
 Author:         Martijn van Steenbergen
 Maintainer:     martijn@van.steenbergen.nl
 Stability:      Experimental
+Category:       JSON, Language
+License:        BSD3
+License-file:   LICENSE
 Copyright:      Some Rights Reserved (CC) 2010-2015 Martijn van Steenbergen
 Homepage:       https://github.com/MedeaMelana/JsonGrammar2
 Bug-reports:    https://github.com/MedeaMelana/JsonGrammar2/issues
 
 
 Cabal-Version:  >= 1.8
-License:        BSD3
-License-file:   LICENSE
-Category:       JSON, Language
+Tested-With:    GHC == 7.8.4, GHC == 7.10.3, GHC == 8.0.1
 Build-type:     Simple
 
 
