@@ -20,12 +20,12 @@ import Control.Category (Category(..))
 import Data.Aeson (Value, FromJSON(..), ToJSON(..))
 import Data.Aeson.Types (Parser)
 import Data.Monoid (Monoid(..))
-import Data.StackPrism (StackPrism, forward, backward, (:-)(..))
+import Data.StackPrism (StackPrism, stackPrism, forward, backward, (:-)(..))
 import Data.String (IsString(..))
 import Data.Text (Text)
 import Language.TypeScript (Type(..), PredefinedType(..))
-
-
+import qualified Data.Aeson as Aeson
+import qualified Data.Text as Text
 
 -- Types
 
@@ -201,3 +201,17 @@ defaultValue x = Pure f g
 -- | Create a 'pure' grammar from a 'StackPrism'.
 fromPrism :: StackPrism a b -> Grammar c a b
 fromPrism p = Pure (return . forward p) (backward p)
+
+-- | Apply a prism to the top of the stack
+--
+-- TODO: It would be nicer if this was part of Data.StackPrism
+top :: StackPrism a b -> StackPrism (a :- t) (b :- t)
+top prism = stackPrism (\(a :- t) -> (forward prism a :- t))
+                       (\(b :- t) -> (:- t) `fmap` backward prism b)
+
+-- | Grammar for strings
+--
+-- (Defined explicitly rather than a Json instance so that we do not rely
+-- on OverlappingInstances.)
+string :: Grammar Val (Value :- t) (String :- t)
+string = fromPrism (top (stackPrism Text.unpack (Just . Text.pack))) . grammar
