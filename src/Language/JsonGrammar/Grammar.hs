@@ -24,7 +24,7 @@ import Data.StackPrism (StackPrism, forward, backward, (:-)(..))
 import Data.String (IsString(..))
 import Data.Text (Text)
 import Language.TypeScript (Type(..), PredefinedType(..))
-
+import qualified Data.Aeson as Aeson
 
 
 -- Types
@@ -201,3 +201,14 @@ defaultValue x = Pure f g
 -- | Create a 'pure' grammar from a 'StackPrism'.
 fromPrism :: StackPrism a b -> Grammar c a b
 fromPrism p = Pure (return . forward p) (backward p)
+
+-- | Define a grammar by enumerating the possible values
+--
+-- For example:
+--
+-- > bool :: Grammar Val (Value :- t) (Bool :- t)
+-- > bool = enumeration [(True, "true"), (False, "false")]
+enumeration :: Eq a => [(a, Text)] -> Grammar Val (Value :- t) (a :- t)
+enumeration = mconcat . map aux
+  where
+    aux (a, txt) = defaultValue a . literal (Aeson.String txt)
