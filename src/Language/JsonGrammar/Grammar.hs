@@ -186,6 +186,30 @@ liftAeson = Pure f g
 prop :: Json a => Text -> Grammar 'Obj t (a :- t)
 prop n = Property n grammar
 
+-- | Like 'prop', but for optional properties
+optProp :: Json a => Text -> Grammar Obj t (Maybe a :- t)
+optProp propName = just `mappend` nothing
+  where
+    just :: Json a => Grammar Obj t (Maybe a :- t)
+    just = pure fr to . prop propName
+      where
+        fr :: (a :- t) -> Parser (Maybe a :- t)
+        fr (a :- t) = return (Just a :- t)
+
+        to :: (Maybe a :- t) -> Maybe (a :- t)
+        to (Just a  :- t) = Just (a :- t)
+        to (Nothing :- _) = Nothing
+
+    nothing :: Grammar Obj t (Maybe a :- t)
+    nothing = pure fr to
+      where
+        fr :: t -> Parser (Maybe a :- t)
+        fr t = return (Nothing :- t)
+
+        to :: (Maybe a :- t) -> Maybe t
+        to (Nothing :- t) = Just t
+        to (Just _  :- _) = Nothing
+
 -- | Expect or produce an array 'element' whose value grammar is specified by 'grammar'.
 el :: Json a => Grammar 'Arr t (a :- t)
 el = Element grammar
